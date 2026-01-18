@@ -3,26 +3,66 @@
 import { useState } from 'react';
 import CouponCard from '@/components/CouponCard';
 import CategoryFilter from '@/components/CategoryFilter';
-import { dummyCoupons } from '@/lib/dummyData';
+import AddCouponForm from '@/components/AddCouponForm';
+import { useCoupons } from '@/hooks/useCoupons';
 import { CouponCategory } from '@/types/coupon';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<CouponCategory | 'all'>('all');
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const { coupons, isLoading, addCoupon, clearExpiredCoupons } = useCoupons();
 
   const filteredCoupons = selectedCategory === 'all'
-    ? dummyCoupons
-    : dummyCoupons.filter(coupon => coupon.category === selectedCategory);
+    ? coupons
+    : coupons.filter(coupon => coupon.category === selectedCategory);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
+        <div className="text-zinc-600 dark:text-zinc-400">読み込み中...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <header className="bg-white dark:bg-zinc-900 shadow-sm border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-            クーポン一覧
-          </h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-            お得なクーポンを見つけて、賢くお買い物
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                クーポン一覧
+              </h1>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+                お得なクーポンを見つけて、賢くお買い物（{coupons.length}件）
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={clearExpiredCoupons}
+                className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
+              >
+                期限切れを削除
+              </button>
+              <button
+                onClick={() => setIsAddFormOpen(true)}
+                className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center gap-2"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M12 4v16m8-8H4"></path>
+                </svg>
+                クーポン追加
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -46,6 +86,13 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      {isAddFormOpen && (
+        <AddCouponForm
+          onAddCoupon={addCoupon}
+          onClose={() => setIsAddFormOpen(false)}
+        />
+      )}
     </div>
   );
 }
