@@ -10,7 +10,7 @@ import { CouponCategory } from '@/types/coupon';
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<CouponCategory | 'all'>('all');
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
-  const { coupons, isLoading, addCoupon, clearExpiredCoupons } = useCoupons();
+  const { coupons, isLoading, addCoupon, removeCoupon, clearExpiredCoupons } = useCoupons();
 
   const filteredCoupons = selectedCategory === 'all'
     ? coupons
@@ -74,7 +74,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCoupons.map((coupon) => (
-            <CouponCard key={coupon.id} coupon={coupon} />
+            <CouponCard key={coupon.id} coupon={coupon} onDelete={removeCoupon} />
           ))}
         </div>
 
