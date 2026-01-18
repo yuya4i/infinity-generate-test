@@ -58,11 +58,53 @@ export function useCoupons() {
     setCoupons(prev => prev.filter(coupon => new Date(coupon.expiresAt) > now));
   };
 
+  const exportCoupons = () => {
+    const dataStr = JSON.stringify(coupons, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const exportFileDefaultName = `coupons-${new Date().toISOString().split('T')[0]}.json`;
+
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const importCoupons = (file: File) => {
+    return new Promise<void>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          const imported = JSON.parse(content);
+
+          if (!Array.isArray(imported)) {
+            throw new Error('Invalid file format');
+          }
+
+          const withDates = imported.map((coupon: Coupon) => ({
+            ...coupon,
+            expiresAt: new Date(coupon.expiresAt),
+            acquiredAt: new Date(coupon.acquiredAt),
+          }));
+
+          setCoupons(withDates);
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
+  };
+
   return {
     coupons,
     isLoading,
     addCoupon,
     removeCoupon,
     clearExpiredCoupons,
+    exportCoupons,
+    importCoupons,
   };
 }

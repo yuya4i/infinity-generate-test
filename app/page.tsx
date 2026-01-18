@@ -14,7 +14,20 @@ export default function Home() {
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const { coupons, isLoading, addCoupon, removeCoupon, clearExpiredCoupons } = useCoupons();
+  const { coupons, isLoading, addCoupon, removeCoupon, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        await importCoupons(file);
+        alert('クーポンデータをインポートしました');
+      } catch (error) {
+        alert('インポートに失敗しました: ' + (error instanceof Error ? error.message : '不明なエラー'));
+      }
+      e.target.value = '';
+    }
+  };
 
   const filteredAndSortedCoupons = useMemo(() => {
     let filtered = coupons;
@@ -72,7 +85,22 @@ export default function Home() {
                 お得なクーポンを見つけて、賢くお買い物（{coupons.length}件）
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={exportCoupons}
+                className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
+              >
+                エクスポート
+              </button>
+              <label className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors cursor-pointer">
+                インポート
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImport}
+                  className="hidden"
+                />
+              </label>
               <button
                 onClick={clearExpiredCoupons}
                 className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
