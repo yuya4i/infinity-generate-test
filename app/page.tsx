@@ -1,20 +1,55 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import CouponCard from '@/components/CouponCard';
 import CategoryFilter from '@/components/CategoryFilter';
 import AddCouponForm from '@/components/AddCouponForm';
+import SearchBar from '@/components/SearchBar';
+import SortControl, { SortOption } from '@/components/SortControl';
 import { useCoupons } from '@/hooks/useCoupons';
 import { CouponCategory } from '@/types/coupon';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<CouponCategory | 'all'>('all');
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
   const { coupons, isLoading, addCoupon, removeCoupon, clearExpiredCoupons } = useCoupons();
 
-  const filteredCoupons = selectedCategory === 'all'
-    ? coupons
-    : coupons.filter(coupon => coupon.category === selectedCategory);
+  const filteredAndSortedCoupons = useMemo(() => {
+    let filtered = coupons;
+
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(coupon => coupon.category === selectedCategory);
+    }
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(coupon =>
+        coupon.title.toLowerCase().includes(query) ||
+        coupon.description.toLowerCase().includes(query) ||
+        coupon.source.toLowerCase().includes(query) ||
+        coupon.tags.some(tag => tag.toLowerCase().includes(query))
+      );
+    }
+
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.acquiredAt).getTime() - new Date(a.acquiredAt).getTime();
+        case 'oldest':
+          return new Date(a.acquiredAt).getTime() - new Date(b.acquiredAt).getTime();
+        case 'expiring-soon':
+          return new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime();
+        case 'expiring-last':
+          return new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime();
+        default:
+          return 0;
+      }
+    });
+
+    return sorted;
+  }, [coupons, selectedCategory, searchQuery, sortBy]);
 
   if (isLoading) {
     return (
@@ -67,21 +102,34 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <CategoryFilter
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
+        <SearchBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
 
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <CategoryFilter
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+          <SortControl
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCoupons.map((coupon) => (
+          {filteredAndSortedCoupons.map((coupon) => (
             <CouponCard key={coupon.id} coupon={coupon} onDelete={removeCoupon} />
           ))}
         </div>
 
-        {filteredCoupons.length === 0 && (
+        {filteredAndSortedCoupons.length === 0 && (
           <div className="text-center py-12">
             <p className="text-zinc-600 dark:text-zinc-400">
-              このカテゴリのクーポンはありません
+              {searchQuery
+                ? '検索条件に一致するクーポンがありません'
+                : 'このカテゴリのクーポンはありません'}
             </p>
           </div>
         )}

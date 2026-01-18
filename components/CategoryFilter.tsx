@@ -22,7 +22,7 @@ const categories: { value: CouponCategory | 'all'; label: string }[] = [
  */
 export default function CategoryFilter({ selectedCategory, onCategoryChange }: CategoryFilterProps) {
   return (
-    <div className="flex flex-wrap gap-2 mb-6">
+    <div className="flex flex-wrap gap-2">
       {categories.map((category) => (
         <button
           key={category.value}
