@@ -6,6 +6,7 @@ import CategoryFilter from '@/components/CategoryFilter';
 import AddCouponForm from '@/components/AddCouponForm';
 import SearchBar from '@/components/SearchBar';
 import SortControl, { SortOption } from '@/components/SortControl';
+import CouponStats from '@/components/CouponStats';
 import { useCoupons } from '@/hooks/useCoupons';
 import { CouponCategory } from '@/types/coupon';
 
@@ -130,6 +131,8 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <CouponStats coupons={coupons} />
+
         <SearchBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
