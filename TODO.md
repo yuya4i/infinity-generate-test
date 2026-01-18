@@ -9,12 +9,14 @@
 - [x] (P0)(Med)(Dev) クーポン一覧UI実装
 - [x] (P0)(Med)(Dev) カテゴリフィルタ実装
 - [x] (P0)(Easy)(Test) agent-browserによる動作確認
+- [x] (P0)(Med)(Dev) クーポンデータ永続化（LocalStorage）
+- [x] (P0)(Easy)(Dev) クーポン手動追加フォーム実装
+- [x] (P0)(Easy)(Dev) クーポン削除機能実装
+- [x] (P0)(Easy)(Dev) 期限切れクーポン一括削除機能
+- [x] (P0)(Med)(Web) AliExpressクーポン取得調査（API利用不可、手動追加で代替）
 
 ## P0（最優先）
 
-- [ ] (P0)(Med)(Web) AliExpressクーポン取得実装
-- [ ] (P0)(Med)(Dev) クーポンデータ永続化（LocalStorage）
-- [ ] (P0)(Easy)(Dev) クーポン有効期限切れ表示改善
 - [ ] (P0)(Easy)(Test) E2Eテストスクリプト作成
 
 ## P1（高優先度）
