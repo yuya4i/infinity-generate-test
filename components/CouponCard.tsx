@@ -21,11 +21,24 @@ export default function CouponCard({ coupon, onDelete, onEdit, onDuplicate, onTo
     });
   };
 
-  const isExpired = new Date(coupon.expiresAt) < new Date();
+  const now = new Date();
+  const expiresAt = new Date(coupon.expiresAt);
+  const isExpired = expiresAt < now;
+
+  // 期限までの日数を計算
+  const daysUntilExpiry = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const isExpiringSoon = daysUntilExpiry <= 7 && daysUntilExpiry > 0;
+  const isExpiringVeryEarly = daysUntilExpiry <= 3 && daysUntilExpiry > 0;
 
   return (
     <article
-      className="bg-white dark:bg-zinc-900 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-zinc-200 dark:border-zinc-800 relative"
+      className={`bg-white dark:bg-zinc-900 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border relative ${
+        isExpiringVeryEarly
+          ? 'border-red-500 dark:border-red-400 border-2'
+          : isExpiringSoon
+          ? 'border-orange-500 dark:border-orange-400 border-2'
+          : 'border-zinc-200 dark:border-zinc-800'
+      }`}
       role="listitem"
       aria-label={`${coupon.title}のクーポン`}
     >
@@ -97,9 +110,21 @@ export default function CouponCard({ coupon, onDelete, onEdit, onDuplicate, onTo
             {coupon.source}
           </p>
         </div>
-        <span className="px-3 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">
-          {coupon.category}
-        </span>
+        <div className="flex flex-col gap-2 items-end">
+          <span className="px-3 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">
+            {coupon.category}
+          </span>
+          {isExpiringVeryEarly && (
+            <span className="px-3 py-1 text-xs font-bold bg-red-500 text-white rounded-full animate-pulse flex items-center gap-1">
+              🔴 あと{daysUntilExpiry}日
+            </span>
+          )}
+          {isExpiringSoon && !isExpiringVeryEarly && (
+            <span className="px-3 py-1 text-xs font-medium bg-orange-500 text-white rounded-full flex items-center gap-1">
+              ⚠️ あと{daysUntilExpiry}日
+            </span>
+          )}
+        </div>
       </div>
 
       <p className="text-sm text-zinc-700 dark:text-zinc-300 mb-4">
