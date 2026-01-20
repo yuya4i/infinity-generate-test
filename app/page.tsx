@@ -24,6 +24,8 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
   const [isImporting, setIsImporting] = useState(false);
+  const [selectedCoupons, setSelectedCoupons] = useState<Set<string>>(new Set());
+  const [isBulkMode, setIsBulkMode] = useState(false);
   const { coupons, isLoading, addCoupon, duplicateCoupon, removeCoupon, updateCoupon, toggleFavorite, toggleUsed, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
   const { theme, toggleTheme } = useTheme();
   const { toasts, hideToast, success, error } = useToast();
@@ -75,6 +77,64 @@ export default function Home() {
     }
   };
 
+  const toggleCouponSelection = (id: string) => {
+    setSelectedCoupons(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedCoupons.size === paginatedCoupons.length) {
+      setSelectedCoupons(new Set());
+    } else {
+      setSelectedCoupons(new Set(paginatedCoupons.map(c => c.id)));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedCoupons.size === 0) return;
+
+    if (window.confirm(`${selectedCoupons.size}件のクーポンを削除しますか？`)) {
+      try {
+        selectedCoupons.forEach(id => removeCoupon(id));
+        success(`${selectedCoupons.size}件のクーポンを削除しました`);
+        setSelectedCoupons(new Set());
+      } catch (err) {
+        error('一括削除に失敗しました');
+      }
+    }
+  };
+
+  const handleBulkToggleFavorite = () => {
+    if (selectedCoupons.size === 0) return;
+
+    try {
+      selectedCoupons.forEach(id => toggleFavorite(id));
+      success(`${selectedCoupons.size}件のクーポンのお気に入り状態を変更しました`);
+      setSelectedCoupons(new Set());
+    } catch (err) {
+      error('一括操作に失敗しました');
+    }
+  };
+
+  const handleBulkToggleUsed = () => {
+    if (selectedCoupons.size === 0) return;
+
+    try {
+      selectedCoupons.forEach(id => toggleUsed(id));
+      success(`${selectedCoupons.size}件のクーポンの使用済み状態を変更しました`);
+      setSelectedCoupons(new Set());
+    } catch (err) {
+      error('一括操作に失敗しました');
+    }
+  };
+
   const filteredAndSortedCoupons = useMemo(() => {
     let filtered = coupons;
 
@@ -118,6 +178,13 @@ export default function Home() {
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategory, searchQuery, sortBy]);
+
+  // Clear selections when bulk mode is disabled
+  useEffect(() => {
+    if (!isBulkMode) {
+      setSelectedCoupons(new Set());
+    }
+  }, [isBulkMode]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -197,6 +264,17 @@ export default function Home() {
             </div>
             <nav aria-label="主要操作" className="flex flex-wrap gap-3">
               <button
+                onClick={() => setIsBulkMode(!isBulkMode)}
+                className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                  isBulkMode
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100'
+                }`}
+                aria-label="一括操作モード"
+              >
+                {isBulkMode ? '✓ 一括操作' : '一括操作'}
+              </button>
+              <button
                 onClick={toggleTheme}
                 className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
                 title={`現在: ${theme === 'light' ? 'ライト' : theme === 'dark' ? 'ダーク' : 'システム'}モード`}
@@ -251,7 +329,7 @@ export default function Home() {
                 </svg>
                 クーポン追加
               </button>
-            </div>
+            </nav>
           </div>
         </div>
       </header>
@@ -263,6 +341,44 @@ export default function Home() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
         />
+
+        {isBulkMode && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                {selectedCoupons.size}件選択中
+              </span>
+              <button
+                onClick={toggleSelectAll}
+                className="px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 rounded border border-zinc-300 dark:border-zinc-600 transition-colors"
+              >
+                {selectedCoupons.size === paginatedCoupons.length ? '全解除' : '全選択'}
+              </button>
+              <div className="flex-1"></div>
+              <button
+                onClick={handleBulkToggleFavorite}
+                disabled={selectedCoupons.size === 0}
+                className="px-3 py-1.5 text-sm bg-yellow-600 hover:bg-yellow-700 disabled:bg-zinc-300 dark:disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded transition-colors disabled:cursor-not-allowed"
+              >
+                お気に入り切替
+              </button>
+              <button
+                onClick={handleBulkToggleUsed}
+                disabled={selectedCoupons.size === 0}
+                className="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 disabled:bg-zinc-300 dark:disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded transition-colors disabled:cursor-not-allowed"
+              >
+                使用済み切替
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                disabled={selectedCoupons.size === 0}
+                className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 disabled:bg-zinc-300 dark:disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded transition-colors disabled:cursor-not-allowed"
+              >
+                削除
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <CategoryFilter
@@ -289,6 +405,9 @@ export default function Home() {
               onDuplicate={duplicateCoupon}
               onToggleFavorite={toggleFavorite}
               onToggleUsed={toggleUsed}
+              isSelectable={isBulkMode}
+              isSelected={selectedCoupons.has(coupon.id)}
+              onToggleSelect={toggleCouponSelection}
             />
           ))}
         </div>

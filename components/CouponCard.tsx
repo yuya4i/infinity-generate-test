@@ -7,12 +7,15 @@ interface CouponCardProps {
   onDuplicate?: (id: string) => void;
   onToggleFavorite?: (id: string) => void;
   onToggleUsed?: (id: string) => void;
+  isSelectable?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
 /**
  * クーポンカードコンポーネント
  */
-export default function CouponCard({ coupon, onDelete, onEdit, onDuplicate, onToggleFavorite, onToggleUsed }: CouponCardProps) {
+export default function CouponCard({ coupon, onDelete, onEdit, onDuplicate, onToggleFavorite, onToggleUsed, isSelectable, isSelected, onToggleSelect }: CouponCardProps) {
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('ja-JP', {
       year: 'numeric',
@@ -25,11 +28,24 @@ export default function CouponCard({ coupon, onDelete, onEdit, onDuplicate, onTo
 
   return (
     <article
-      className="bg-white dark:bg-zinc-900 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-zinc-200 dark:border-zinc-800 relative"
+      className={`bg-white dark:bg-zinc-900 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border relative ${
+        isSelected ? 'border-blue-500 dark:border-blue-400 border-2' : 'border-zinc-200 dark:border-zinc-800'
+      }`}
       role="listitem"
       aria-label={`${coupon.title}のクーポン`}
     >
-      <div className="absolute top-2 right-2 flex gap-1" role="group" aria-label="クーポン操作">
+      {isSelectable && onToggleSelect && (
+        <div className="absolute top-2 left-2">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onToggleSelect(coupon.id)}
+            className="w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            aria-label={`${coupon.title}を選択`}
+          />
+        </div>
+      )}
+      <div className={`absolute top-2 ${isSelectable ? 'right-2' : 'right-2'} flex gap-1`} role="group" aria-label="クーポン操作">
         {onEdit && (
           <button
             onClick={() => onEdit(coupon)}
