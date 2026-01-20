@@ -21,6 +21,8 @@ export default function EditCouponForm({ coupon, onUpdateCoupon, onClose }: Edit
     expiresAt: new Date(coupon.expiresAt).toISOString().split('T')[0],
     url: coupon.url,
     tags: coupon.tags.join(', '),
+    couponCode: coupon.couponCode || '',
+    savedAmount: coupon.savedAmount?.toString() || '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -86,6 +88,8 @@ export default function EditCouponForm({ coupon, onUpdateCoupon, onClose }: Edit
       expiresAt: new Date(formData.expiresAt),
       url: formData.url.trim(),
       tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      couponCode: formData.couponCode.trim() || undefined,
+      savedAmount: formData.savedAmount ? parseFloat(formData.savedAmount) : undefined,
     };
 
     onUpdateCoupon(coupon.id, updates);
@@ -249,6 +253,40 @@ export default function EditCouponForm({ coupon, onUpdateCoupon, onClose }: Edit
                 className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
                 placeholder="例: 初回限定, 全商品対象"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                クーポンコード
+              </label>
+              <input
+                type="text"
+                value={formData.couponCode}
+                onChange={(e) => setFormData({ ...formData, couponCode: e.target.value })}
+                className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono"
+                placeholder="例: SAVE20, FIRST10OFF"
+              />
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                オンラインで使用する実際のプロモーションコードを入力してください（オプション）
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                節約額（円）
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={formData.savedAmount}
+                onChange={(e) => setFormData({ ...formData, savedAmount: e.target.value })}
+                className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                placeholder="例: 500"
+              />
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                このクーポンで節約できる金額を入力してください（オプション）
+              </p>
             </div>
 
             <div className="flex gap-3 pt-4">

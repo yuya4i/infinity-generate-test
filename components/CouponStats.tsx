@@ -27,17 +27,22 @@ export default function CouponStats({ coupons }: CouponStatsProps) {
       return acc;
     }, {} as Record<string, number>);
 
+    const totalSavings = coupons.reduce((sum, coupon) => {
+      return sum + (coupon.savedAmount || 0);
+    }, 0);
+
     return {
       total,
       active: total - expired,
       expired,
       expiringSoon,
       byCategory,
+      totalSavings,
     };
   }, [coupons]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
       <div className="bg-white dark:bg-zinc-900 rounded-lg shadow p-6 border border-zinc-200 dark:border-zinc-800">
         <div className="flex items-center justify-between">
           <div>
@@ -137,6 +142,32 @@ export default function CouponStats({ coupons }: CouponStatsProps) {
               stroke="currentColor"
             >
               <path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-zinc-900 rounded-lg shadow p-6 border border-zinc-200 dark:border-zinc-800">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+              累計節約額
+            </p>
+            <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">
+              ¥{stats.totalSavings.toLocaleString()}
+            </p>
+          </div>
+          <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
+            <svg
+              className="w-6 h-6 text-purple-600 dark:text-purple-300"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
         </div>

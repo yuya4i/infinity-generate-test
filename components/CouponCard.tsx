@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Coupon } from '@/types/coupon';
 
 interface CouponCardProps {
@@ -13,6 +14,21 @@ interface CouponCardProps {
  * クーポンカードコンポーネント
  */
 export default function CouponCard({ coupon, onDelete, onEdit, onDuplicate, onToggleFavorite, onToggleUsed }: CouponCardProps) {
+  const [showCode, setShowCode] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCode = async () => {
+    if (coupon.couponCode) {
+      try {
+        await navigator.clipboard.writeText(coupon.couponCode);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    }
+  };
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('ja-JP', {
       year: 'numeric',
@@ -116,6 +132,50 @@ export default function CouponCard({ coupon, onDelete, onEdit, onDuplicate, onTo
           </span>
         ))}
       </div>
+
+      {coupon.couponCode && (
+        <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                クーポンコード
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="text-sm font-mono font-bold text-blue-900 dark:text-blue-100">
+                  {showCode ? coupon.couponCode : '••••••••'}
+                </code>
+                <button
+                  onClick={() => setShowCode(!showCode)}
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                  title={showCode ? 'コードを隠す' : 'コードを表示'}
+                >
+                  {showCode ? '👁️' : '👁️‍🗨️'}
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={handleCopyCode}
+              className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                copied
+                  ? 'bg-green-500 text-white'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+              title="クリップボードにコピー"
+            >
+              {copied ? '✓ コピー完了' : 'コピー'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {coupon.savedAmount && (
+        <div className="mb-4 flex items-center gap-2 text-sm">
+          <span className="text-zinc-600 dark:text-zinc-400">節約額:</span>
+          <span className="font-bold text-green-600 dark:text-green-400">
+            ¥{coupon.savedAmount.toLocaleString()}
+          </span>
+        </div>
+      )}
 
       <div className="space-y-3">
         <div className="flex justify-between items-center">

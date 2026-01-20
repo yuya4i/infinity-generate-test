@@ -45,6 +45,12 @@ export interface Coupon {
 
   /** 使用済みフラグ */
   isUsed?: boolean;
+
+  /** クーポンコード（プロモーションコード） */
+  couponCode?: string;
+
+  /** 節約額（使用時に記録） */
+  savedAmount?: number;
 }
 
 /**
