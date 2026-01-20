@@ -251,7 +251,7 @@ export default function Home() {
                 </svg>
                 クーポン追加
               </button>
-            </div>
+            </nav>
           </div>
         </div>
       </header>
