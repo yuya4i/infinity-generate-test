@@ -115,6 +115,48 @@ export default function Home() {
     setCurrentPage(1);
   }, [selectedCategory, searchQuery, sortBy]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        // Allow Escape to work in forms
+        if (e.key === 'Escape') {
+          (e.target as HTMLElement).blur();
+        }
+        return;
+      }
+
+      switch (e.key) {
+        case 'n':
+        case 'a':
+          // Open add coupon form
+          setIsAddFormOpen(true);
+          e.preventDefault();
+          break;
+        case '/':
+          // Focus search
+          const searchInput = document.querySelector('input[type="text"][placeholder*="検索"]') as HTMLInputElement;
+          if (searchInput) {
+            searchInput.focus();
+            e.preventDefault();
+          }
+          break;
+        case 'Escape':
+          // Close modals
+          if (isAddFormOpen) {
+            setIsAddFormOpen(false);
+          } else if (editingCoupon) {
+            setEditingCoupon(null);
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isAddFormOpen, editingCoupon]);
+
   const paginatedCoupons = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -142,6 +184,11 @@ export default function Home() {
               </h1>
               <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
                 お得なクーポンを見つけて、賢くお買い物（{coupons.length}件）
+              </p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">
+                キーボードショートカット: <kbd className="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded text-xs">N</kbd> 追加 /
+                <kbd className="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded text-xs">/</kbd> 検索 /
+                <kbd className="px-1.5 py-0.5 bg-zinc-200 dark:bg-zinc-800 rounded text-xs">ESC</kbd> 閉じる
               </p>
             </div>
             <nav aria-label="主要操作" className="flex flex-wrap gap-3">
