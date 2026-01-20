@@ -10,6 +10,7 @@ import SortControl, { SortOption } from '@/components/SortControl';
 import CouponStats from '@/components/CouponStats';
 import Pagination from '@/components/Pagination';
 import Toast from '@/components/Toast';
+import CalendarView from '@/components/CalendarView';
 import { useCoupons } from '@/hooks/useCoupons';
 import { useTheme } from '@/hooks/useTheme';
 import { useToast } from '@/hooks/useToast';
@@ -24,6 +25,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
   const [isImporting, setIsImporting] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const { coupons, isLoading, addCoupon, duplicateCoupon, removeCoupon, updateCoupon, toggleFavorite, toggleUsed, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
   const { theme, toggleTheme } = useTheme();
   const { toasts, hideToast, success, error } = useToast();
@@ -234,6 +236,14 @@ export default function Home() {
             </div>
             <nav aria-label="主要操作" className="flex flex-wrap gap-3">
               <button
+                onClick={() => setViewMode(viewMode === 'list' ? 'calendar' : 'list')}
+                className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
+                title={`現在: ${viewMode === 'list' ? 'リスト' : 'カレンダー'}表示`}
+                aria-label={`表示切り替え（現在: ${viewMode === 'list' ? 'リスト' : 'カレンダー'}表示）`}
+              >
+                {viewMode === 'list' ? '📅' : '📋'}
+              </button>
+              <button
                 onClick={toggleTheme}
                 className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
                 title={`現在: ${theme === 'light' ? 'ライト' : theme === 'dark' ? 'ダーク' : 'システム'}モード`}
@@ -312,41 +322,50 @@ export default function Home() {
           />
         </div>
 
-        <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          role="list"
-          aria-label="クーポン一覧"
-        >
-          {paginatedCoupons.map((coupon) => (
-            <CouponCard
-              key={coupon.id}
-              coupon={coupon}
-              onDelete={handleDelete}
-              onEdit={setEditingCoupon}
-              onDuplicate={duplicateCoupon}
-              onToggleFavorite={toggleFavorite}
-              onToggleUsed={toggleUsed}
+        {viewMode === 'calendar' ? (
+          <CalendarView
+            coupons={filteredAndSortedCoupons}
+            onCouponClick={setEditingCoupon}
+          />
+        ) : (
+          <>
+            <div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              role="list"
+              aria-label="クーポン一覧"
+            >
+              {paginatedCoupons.map((coupon) => (
+                <CouponCard
+                  key={coupon.id}
+                  coupon={coupon}
+                  onDelete={handleDelete}
+                  onEdit={setEditingCoupon}
+                  onDuplicate={duplicateCoupon}
+                  onToggleFavorite={toggleFavorite}
+                  onToggleUsed={toggleUsed}
+                />
+              ))}
+            </div>
+
+            {filteredAndSortedCoupons.length === 0 && (
+              <div className="text-center py-12" role="status" aria-live="polite">
+                <p className="text-zinc-600 dark:text-zinc-400">
+                  {searchQuery
+                    ? '検索条件に一致するクーポンがありません'
+                    : 'このカテゴリのクーポンはありません'}
+                </p>
+              </div>
+            )}
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredAndSortedCoupons.length}
             />
-          ))}
-        </div>
-
-        {filteredAndSortedCoupons.length === 0 && (
-          <div className="text-center py-12" role="status" aria-live="polite">
-            <p className="text-zinc-600 dark:text-zinc-400">
-              {searchQuery
-                ? '検索条件に一致するクーポンがありません'
-                : 'このカテゴリのクーポンはありません'}
-            </p>
-          </div>
+          </>
         )}
-
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-          itemsPerPage={itemsPerPage}
-          totalItems={filteredAndSortedCoupons.length}
-        />
       </main>
 
       {isAddFormOpen && (
