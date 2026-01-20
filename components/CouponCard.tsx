@@ -3,12 +3,13 @@ import { Coupon } from '@/types/coupon';
 interface CouponCardProps {
   coupon: Coupon;
   onDelete?: (id: string) => void;
+  onEdit?: (coupon: Coupon) => void;
 }
 
 /**
  * クーポンカードコンポーネント
  */
-export default function CouponCard({ coupon, onDelete }: CouponCardProps) {
+export default function CouponCard({ coupon, onDelete, onEdit }: CouponCardProps) {
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('ja-JP', {
       year: 'numeric',
@@ -21,25 +22,46 @@ export default function CouponCard({ coupon, onDelete }: CouponCardProps) {
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-zinc-200 dark:border-zinc-800 relative">
-      {onDelete && (
-        <button
-          onClick={() => onDelete(coupon.id)}
-          className="absolute top-2 right-2 p-1 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-          title="削除"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+      <div className="absolute top-2 right-2 flex gap-1">
+        {onEdit && (
+          <button
+            onClick={() => onEdit(coupon)}
+            className="p-1 text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            title="編集"
           >
-            <path d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      )}
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+          </button>
+        )}
+        {onDelete && (
+          <button
+            onClick={() => onDelete(coupon.id)}
+            className="p-1 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            title="削除"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        )}
+      </div>
       <div className="flex justify-between items-start mb-3 pr-6">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">

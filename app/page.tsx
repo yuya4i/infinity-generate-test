@@ -4,18 +4,20 @@ import { useState, useMemo } from 'react';
 import CouponCard from '@/components/CouponCard';
 import CategoryFilter from '@/components/CategoryFilter';
 import AddCouponForm from '@/components/AddCouponForm';
+import EditCouponForm from '@/components/EditCouponForm';
 import SearchBar from '@/components/SearchBar';
 import SortControl, { SortOption } from '@/components/SortControl';
 import CouponStats from '@/components/CouponStats';
 import { useCoupons } from '@/hooks/useCoupons';
-import { CouponCategory } from '@/types/coupon';
+import { CouponCategory, Coupon } from '@/types/coupon';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<CouponCategory | 'all'>('all');
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const { coupons, isLoading, addCoupon, removeCoupon, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
+  const { coupons, isLoading, addCoupon, removeCoupon, updateCoupon, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -151,7 +153,12 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAndSortedCoupons.map((coupon) => (
-            <CouponCard key={coupon.id} coupon={coupon} onDelete={removeCoupon} />
+            <CouponCard
+              key={coupon.id}
+              coupon={coupon}
+              onDelete={removeCoupon}
+              onEdit={setEditingCoupon}
+            />
           ))}
         </div>
 
@@ -170,6 +177,14 @@ export default function Home() {
         <AddCouponForm
           onAddCoupon={addCoupon}
           onClose={() => setIsAddFormOpen(false)}
+        />
+      )}
+
+      {editingCoupon && (
+        <EditCouponForm
+          coupon={editingCoupon}
+          onUpdateCoupon={updateCoupon}
+          onClose={() => setEditingCoupon(null)}
         />
       )}
     </div>

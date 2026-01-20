@@ -53,6 +53,12 @@ export function useCoupons() {
     setCoupons(prev => prev.filter(coupon => coupon.id !== id));
   };
 
+  const updateCoupon = (id: string, updates: Partial<Omit<Coupon, 'id' | 'acquiredAt'>>) => {
+    setCoupons(prev => prev.map(coupon =>
+      coupon.id === id ? { ...coupon, ...updates } : coupon
+    ));
+  };
+
   const clearExpiredCoupons = () => {
     const now = new Date();
     setCoupons(prev => prev.filter(coupon => new Date(coupon.expiresAt) > now));
@@ -103,6 +109,7 @@ export function useCoupons() {
     isLoading,
     addCoupon,
     removeCoupon,
+    updateCoupon,
     clearExpiredCoupons,
     exportCoupons,
     importCoupons,
