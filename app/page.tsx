@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import CouponCard from '@/components/CouponCard';
 import CategoryFilter from '@/components/CategoryFilter';
 import AddCouponForm from '@/components/AddCouponForm';
@@ -8,6 +8,7 @@ import EditCouponForm from '@/components/EditCouponForm';
 import SearchBar from '@/components/SearchBar';
 import SortControl, { SortOption } from '@/components/SortControl';
 import CouponStats from '@/components/CouponStats';
+import Pagination from '@/components/Pagination';
 import { useCoupons } from '@/hooks/useCoupons';
 import { useTheme } from '@/hooks/useTheme';
 import { CouponCategory, Coupon } from '@/types/coupon';
@@ -18,6 +19,8 @@ export default function Home() {
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(12);
   const { coupons, isLoading, addCoupon, duplicateCoupon, removeCoupon, updateCoupon, toggleFavorite, toggleUsed, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
   const { theme, toggleTheme } = useTheme();
 
@@ -72,6 +75,19 @@ export default function Home() {
 
     return sorted;
   }, [coupons, selectedCategory, searchQuery, sortBy]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery, sortBy]);
+
+  const paginatedCoupons = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredAndSortedCoupons.slice(startIndex, endIndex);
+  }, [filteredAndSortedCoupons, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredAndSortedCoupons.length / itemsPerPage);
 
   if (isLoading) {
     return (
@@ -165,7 +181,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAndSortedCoupons.map((coupon) => (
+          {paginatedCoupons.map((coupon) => (
             <CouponCard
               key={coupon.id}
               coupon={coupon}
@@ -187,6 +203,14 @@ export default function Home() {
             </p>
           </div>
         )}
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredAndSortedCoupons.length}
+        />
       </main>
 
       {isAddFormOpen && (
