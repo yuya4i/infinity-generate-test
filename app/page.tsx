@@ -17,7 +17,7 @@ export default function Home() {
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const { coupons, isLoading, addCoupon, removeCoupon, updateCoupon, toggleFavorite, toggleUsed, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
+  const { coupons, isLoading, addCoupon, duplicateCoupon, removeCoupon, updateCoupon, toggleFavorite, toggleUsed, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -162,6 +162,7 @@ export default function Home() {
               coupon={coupon}
               onDelete={removeCoupon}
               onEdit={setEditingCoupon}
+              onDuplicate={duplicateCoupon}
               onToggleFavorite={toggleFavorite}
               onToggleUsed={toggleUsed}
             />

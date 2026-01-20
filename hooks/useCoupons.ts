@@ -49,6 +49,21 @@ export function useCoupons() {
     setCoupons(prev => [newCoupon, ...prev]);
   };
 
+  const duplicateCoupon = (id: string) => {
+    const original = coupons.find(c => c.id === id);
+    if (original) {
+      const duplicate: Coupon = {
+        ...original,
+        id: Date.now().toString(),
+        acquiredAt: new Date(),
+        title: `${original.title} (コピー)`,
+        isFavorite: false,
+        isUsed: false,
+      };
+      setCoupons(prev => [duplicate, ...prev]);
+    }
+  };
+
   const removeCoupon = (id: string) => {
     setCoupons(prev => prev.filter(coupon => coupon.id !== id));
   };
@@ -120,6 +135,7 @@ export function useCoupons() {
     coupons,
     isLoading,
     addCoupon,
+    duplicateCoupon,
     removeCoupon,
     updateCoupon,
     toggleFavorite,

@@ -4,6 +4,7 @@ interface CouponCardProps {
   coupon: Coupon;
   onDelete?: (id: string) => void;
   onEdit?: (coupon: Coupon) => void;
+  onDuplicate?: (id: string) => void;
   onToggleFavorite?: (id: string) => void;
   onToggleUsed?: (id: string) => void;
 }
@@ -11,7 +12,7 @@ interface CouponCardProps {
 /**
  * クーポンカードコンポーネント
  */
-export default function CouponCard({ coupon, onDelete, onEdit, onToggleFavorite, onToggleUsed }: CouponCardProps) {
+export default function CouponCard({ coupon, onDelete, onEdit, onDuplicate, onToggleFavorite, onToggleUsed }: CouponCardProps) {
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('ja-JP', {
       year: 'numeric',
@@ -41,6 +42,25 @@ export default function CouponCard({ coupon, onDelete, onEdit, onToggleFavorite,
               stroke="currentColor"
             >
               <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+          </button>
+        )}
+        {onDuplicate && (
+          <button
+            onClick={() => onDuplicate(coupon.id)}
+            className="p-1 text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+            title="複製"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
             </svg>
           </button>
         )}
