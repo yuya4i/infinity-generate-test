@@ -4,12 +4,14 @@ interface CouponCardProps {
   coupon: Coupon;
   onDelete?: (id: string) => void;
   onEdit?: (coupon: Coupon) => void;
+  onToggleFavorite?: (id: string) => void;
+  onToggleUsed?: (id: string) => void;
 }
 
 /**
  * クーポンカードコンポーネント
  */
-export default function CouponCard({ coupon, onDelete, onEdit }: CouponCardProps) {
+export default function CouponCard({ coupon, onDelete, onEdit, onToggleFavorite, onToggleUsed }: CouponCardProps) {
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('ja-JP', {
       year: 'numeric',
@@ -91,20 +93,51 @@ export default function CouponCard({ coupon, onDelete, onEdit }: CouponCardProps
         ))}
       </div>
 
-      <div className="flex justify-between items-center">
-        <div className="text-sm">
-          <p className={`${isExpired ? 'text-red-600 dark:text-red-400' : 'text-zinc-600 dark:text-zinc-400'}`}>
-            有効期限: {formatDate(coupon.expiresAt)}
-          </p>
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <div className="text-sm">
+            <p className={`${isExpired ? 'text-red-600 dark:text-red-400' : 'text-zinc-600 dark:text-zinc-400'}`}>
+              有効期限: {formatDate(coupon.expiresAt)}
+            </p>
+          </div>
+          <a
+            href={coupon.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
+          >
+            利用する
+          </a>
         </div>
-        <a
-          href={coupon.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
-        >
-          利用する
-        </a>
+
+        {(onToggleFavorite || onToggleUsed) && (
+          <div className="flex gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+            {onToggleFavorite && (
+              <button
+                onClick={() => onToggleFavorite(coupon.id)}
+                className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  coupon.isFavorite
+                    ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 hover:bg-yellow-200 dark:hover:bg-yellow-800'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                }`}
+              >
+                {coupon.isFavorite ? '★ お気に入り' : '☆ お気に入り'}
+              </button>
+            )}
+            {onToggleUsed && (
+              <button
+                onClick={() => onToggleUsed(coupon.id)}
+                className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  coupon.isUsed
+                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                }`}
+              >
+                {coupon.isUsed ? '✓ 使用済み' : '使用済みにする'}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -39,6 +39,12 @@ export interface Coupon {
 
   /** タグ */
   tags: string[];
+
+  /** お気に入りフラグ */
+  isFavorite?: boolean;
+
+  /** 使用済みフラグ */
+  isUsed?: boolean;
 }
 
 /**

@@ -12,12 +12,12 @@ import { useCoupons } from '@/hooks/useCoupons';
 import { CouponCategory, Coupon } from '@/types/coupon';
 
 export default function Home() {
-  const [selectedCategory, setSelectedCategory] = useState<CouponCategory | 'all'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<CouponCategory | 'all' | 'favorites' | 'used'>('all');
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const { coupons, isLoading, addCoupon, removeCoupon, updateCoupon, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
+  const { coupons, isLoading, addCoupon, removeCoupon, updateCoupon, toggleFavorite, toggleUsed, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -35,7 +35,11 @@ export default function Home() {
   const filteredAndSortedCoupons = useMemo(() => {
     let filtered = coupons;
 
-    if (selectedCategory !== 'all') {
+    if (selectedCategory === 'favorites') {
+      filtered = filtered.filter(coupon => coupon.isFavorite);
+    } else if (selectedCategory === 'used') {
+      filtered = filtered.filter(coupon => coupon.isUsed);
+    } else if (selectedCategory !== 'all') {
       filtered = filtered.filter(coupon => coupon.category === selectedCategory);
     }
 
@@ -158,6 +162,8 @@ export default function Home() {
               coupon={coupon}
               onDelete={removeCoupon}
               onEdit={setEditingCoupon}
+              onToggleFavorite={toggleFavorite}
+              onToggleUsed={toggleUsed}
             />
           ))}
         </div>

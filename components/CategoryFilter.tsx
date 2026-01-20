@@ -3,12 +3,14 @@
 import { CouponCategory } from '@/types/coupon';
 
 interface CategoryFilterProps {
-  selectedCategory: CouponCategory | 'all';
-  onCategoryChange: (category: CouponCategory | 'all') => void;
+  selectedCategory: CouponCategory | 'all' | 'favorites' | 'used';
+  onCategoryChange: (category: CouponCategory | 'all' | 'favorites' | 'used') => void;
 }
 
-const categories: { value: CouponCategory | 'all'; label: string }[] = [
+const categories: { value: CouponCategory | 'all' | 'favorites' | 'used'; label: string }[] = [
   { value: 'all', label: 'すべて' },
+  { value: 'favorites', label: '★ お気に入り' },
+  { value: 'used', label: '✓ 使用済み' },
   { value: 'food', label: '飲食' },
   { value: 'shopping', label: 'ショッピング' },
   { value: 'travel', label: '旅行' },

@@ -59,6 +59,18 @@ export function useCoupons() {
     ));
   };
 
+  const toggleFavorite = (id: string) => {
+    setCoupons(prev => prev.map(coupon =>
+      coupon.id === id ? { ...coupon, isFavorite: !coupon.isFavorite } : coupon
+    ));
+  };
+
+  const toggleUsed = (id: string) => {
+    setCoupons(prev => prev.map(coupon =>
+      coupon.id === id ? { ...coupon, isUsed: !coupon.isUsed } : coupon
+    ));
+  };
+
   const clearExpiredCoupons = () => {
     const now = new Date();
     setCoupons(prev => prev.filter(coupon => new Date(coupon.expiresAt) > now));
@@ -110,6 +122,8 @@ export function useCoupons() {
     addCoupon,
     removeCoupon,
     updateCoupon,
+    toggleFavorite,
+    toggleUsed,
     clearExpiredCoupons,
     exportCoupons,
     importCoupons,
