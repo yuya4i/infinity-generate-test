@@ -12,6 +12,7 @@ import Pagination from '@/components/Pagination';
 import Toast from '@/components/Toast';
 import CalendarView from '@/components/CalendarView';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import TagFilter from '@/components/TagFilter';
 import { useCoupons } from '@/hooks/useCoupons';
 import { useTheme } from '@/hooks/useTheme';
 import { useToast } from '@/hooks/useToast';
@@ -28,6 +29,8 @@ export default function Home() {
   const [isImporting, setIsImporting] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagFilterMode, setTagFilterMode] = useState<'AND' | 'OR'>('AND');
   const { coupons, isLoading, addCoupon, duplicateCoupon, removeCoupon, updateCoupon, toggleFavorite, toggleUsed, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
   const { theme, toggleTheme } = useTheme();
   const { toasts, hideToast, success, error } = useToast();
@@ -106,6 +109,21 @@ export default function Home() {
       );
     }
 
+    // タグフィルタリング
+    if (selectedTags.length > 0) {
+      if (tagFilterMode === 'AND') {
+        // すべてのタグを含む
+        filtered = filtered.filter(coupon =>
+          selectedTags.every(tag => coupon.tags.includes(tag))
+        );
+      } else {
+        // いずれかのタグを含む
+        filtered = filtered.filter(coupon =>
+          selectedTags.some(tag => coupon.tags.includes(tag))
+        );
+      }
+    }
+
     const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
         case 'newest':
@@ -122,12 +140,12 @@ export default function Home() {
     });
 
     return sorted;
-  }, [coupons, selectedCategory, searchQuery, sortBy]);
+  }, [coupons, selectedCategory, searchQuery, sortBy, selectedTags, tagFilterMode]);
 
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory, searchQuery, sortBy]);
+  }, [selectedCategory, searchQuery, sortBy, selectedTags, tagFilterMode]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -327,6 +345,14 @@ export default function Home() {
             <SearchBar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
+            />
+
+            <TagFilter
+              coupons={coupons}
+              selectedTags={selectedTags}
+              onTagsChange={setSelectedTags}
+              filterMode={tagFilterMode}
+              onFilterModeChange={setTagFilterMode}
             />
 
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">

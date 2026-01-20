@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Coupon, CouponCategory } from '@/types/coupon';
+import TagInput from '@/components/TagInput';
 
 interface EditCouponFormProps {
   coupon: Coupon;
@@ -20,7 +21,7 @@ export default function EditCouponForm({ coupon, onUpdateCoupon, onClose }: Edit
     category: coupon.category,
     expiresAt: new Date(coupon.expiresAt).toISOString().split('T')[0],
     url: coupon.url,
-    tags: coupon.tags.join(', '),
+    tags: coupon.tags,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -85,7 +86,7 @@ export default function EditCouponForm({ coupon, onUpdateCoupon, onClose }: Edit
       category: formData.category,
       expiresAt: new Date(formData.expiresAt),
       url: formData.url.trim(),
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      tags: formData.tags,
     };
 
     onUpdateCoupon(coupon.id, updates);
@@ -240,14 +241,11 @@ export default function EditCouponForm({ coupon, onUpdateCoupon, onClose }: Edit
 
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                タグ（カンマ区切り）
+                タグ
               </label>
-              <input
-                type="text"
-                value={formData.tags}
-                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
-                placeholder="例: 初回限定, 全商品対象"
+              <TagInput
+                tags={formData.tags}
+                onChange={(tags) => setFormData({ ...formData, tags })}
               />
             </div>
 
