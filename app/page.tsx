@@ -9,8 +9,10 @@ import SearchBar from '@/components/SearchBar';
 import SortControl, { SortOption } from '@/components/SortControl';
 import CouponStats from '@/components/CouponStats';
 import Pagination from '@/components/Pagination';
+import Toast from '@/components/Toast';
 import { useCoupons } from '@/hooks/useCoupons';
 import { useTheme } from '@/hooks/useTheme';
+import { useToast } from '@/hooks/useToast';
 import { CouponCategory, Coupon } from '@/types/coupon';
 
 export default function Home() {
@@ -23,17 +25,49 @@ export default function Home() {
   const [itemsPerPage] = useState(12);
   const { coupons, isLoading, addCoupon, duplicateCoupon, removeCoupon, updateCoupon, toggleFavorite, toggleUsed, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
   const { theme, toggleTheme } = useTheme();
+  const { toasts, hideToast, success, error } = useToast();
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       try {
         await importCoupons(file);
-        alert('クーポンデータをインポートしました');
-      } catch (error) {
-        alert('インポートに失敗しました: ' + (error instanceof Error ? error.message : '不明なエラー'));
+        success('クーポンデータをインポートしました');
+      } catch (err) {
+        error('インポートに失敗しました: ' + (err instanceof Error ? err.message : '不明なエラー'));
       }
       e.target.value = '';
+    }
+  };
+
+  const handleExport = () => {
+    try {
+      exportCoupons();
+      success('クーポンデータをエクスポートしました');
+    } catch (err) {
+      error('エクスポートに失敗しました');
+    }
+  };
+
+  const handleClearExpired = () => {
+    if (window.confirm('期限切れのクーポンをすべて削除しますか？')) {
+      try {
+        clearExpiredCoupons();
+        success('期限切れのクーポンを削除しました');
+      } catch (err) {
+        error('削除に失敗しました');
+      }
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('このクーポンを削除しますか？')) {
+      try {
+        removeCoupon(id);
+        success('クーポンを削除しました');
+      } catch (err) {
+        error('削除に失敗しました');
+      }
     }
   };
 
@@ -119,7 +153,7 @@ export default function Home() {
                 {theme === 'light' ? '☀️' : theme === 'dark' ? '🌙' : '💻'}
               </button>
               <button
-                onClick={exportCoupons}
+                onClick={handleExport}
                 className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
               >
                 エクスポート
@@ -134,7 +168,7 @@ export default function Home() {
                 />
               </label>
               <button
-                onClick={clearExpiredCoupons}
+                onClick={handleClearExpired}
                 className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
               >
                 期限切れを削除
@@ -185,7 +219,7 @@ export default function Home() {
             <CouponCard
               key={coupon.id}
               coupon={coupon}
-              onDelete={removeCoupon}
+              onDelete={handleDelete}
               onEdit={setEditingCoupon}
               onDuplicate={duplicateCoupon}
               onToggleFavorite={toggleFavorite}
@@ -227,6 +261,15 @@ export default function Home() {
           onClose={() => setEditingCoupon(null)}
         />
       )}
+
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => hideToast(toast.id)}
+        />
+      ))}
     </div>
   );
 }
