@@ -92,16 +92,22 @@ export default function AddCouponForm({ onAddCoupon, onClose }: AddCouponFormPro
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-coupon-title"
+    >
       <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+            <h2 id="add-coupon-title" className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
               クーポンを追加
             </h2>
             <button
               onClick={onClose}
               className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+              aria-label="閉じる"
             >
               <svg
                 className="w-6 h-6"

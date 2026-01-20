@@ -24,8 +24,12 @@ export default function CouponCard({ coupon, onDelete, onEdit, onDuplicate, onTo
   const isExpired = new Date(coupon.expiresAt) < new Date();
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-zinc-200 dark:border-zinc-800 relative">
-      <div className="absolute top-2 right-2 flex gap-1">
+    <article
+      className="bg-white dark:bg-zinc-900 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-zinc-200 dark:border-zinc-800 relative"
+      role="listitem"
+      aria-label={`${coupon.title}のクーポン`}
+    >
+      <div className="absolute top-2 right-2 flex gap-1" role="group" aria-label="クーポン操作">
         {onEdit && (
           <button
             onClick={() => onEdit(coupon)}
@@ -159,6 +163,6 @@ export default function CouponCard({ coupon, onDelete, onEdit, onDuplicate, onTo
           </div>
         )}
       </div>
-    </div>
+    </article>
   );
 }

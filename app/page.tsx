@@ -144,17 +144,19 @@ export default function Home() {
                 お得なクーポンを見つけて、賢くお買い物（{coupons.length}件）
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <nav aria-label="主要操作" className="flex flex-wrap gap-3">
               <button
                 onClick={toggleTheme}
                 className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
                 title={`現在: ${theme === 'light' ? 'ライト' : theme === 'dark' ? 'ダーク' : 'システム'}モード`}
+                aria-label={`テーマ切り替え（現在: ${theme === 'light' ? 'ライト' : theme === 'dark' ? 'ダーク' : 'システム'}モード）`}
               >
                 {theme === 'light' ? '☀️' : theme === 'dark' ? '🌙' : '💻'}
               </button>
               <button
                 onClick={handleExport}
                 className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
+                aria-label="クーポンデータをエクスポート"
               >
                 エクスポート
               </button>
@@ -164,18 +166,21 @@ export default function Home() {
                   type="file"
                   accept=".json"
                   onChange={handleImport}
-                  className="hidden"
+                  className="sr-only"
+                  aria-label="クーポンデータをインポート"
                 />
               </label>
               <button
                 onClick={handleClearExpired}
                 className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
+                aria-label="期限切れのクーポンを削除"
               >
                 期限切れを削除
               </button>
               <button
                 onClick={() => setIsAddFormOpen(true)}
                 className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center gap-2"
+                aria-label="新しいクーポンを追加"
               >
                 <svg
                   className="w-5 h-5"
@@ -214,7 +219,11 @@ export default function Home() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          role="list"
+          aria-label="クーポン一覧"
+        >
           {paginatedCoupons.map((coupon) => (
             <CouponCard
               key={coupon.id}
@@ -229,7 +238,7 @@ export default function Home() {
         </div>
 
         {filteredAndSortedCoupons.length === 0 && (
-          <div className="text-center py-12">
+          <div className="text-center py-12" role="status" aria-live="polite">
             <p className="text-zinc-600 dark:text-zinc-400">
               {searchQuery
                 ? '検索条件に一致するクーポンがありません'
