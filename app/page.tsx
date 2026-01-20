@@ -23,6 +23,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
+  const [isImporting, setIsImporting] = useState(false);
   const { coupons, isLoading, addCoupon, duplicateCoupon, removeCoupon, updateCoupon, toggleFavorite, toggleUsed, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
   const { theme, toggleTheme } = useTheme();
   const { toasts, hideToast, success, error } = useToast();
@@ -30,11 +31,14 @@ export default function Home() {
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setIsImporting(true);
       try {
         await importCoupons(file);
         success('クーポンデータをインポートしました');
       } catch (err) {
         error('インポートに失敗しました: ' + (err instanceof Error ? err.message : '不明なエラー'));
+      } finally {
+        setIsImporting(false);
       }
       e.target.value = '';
     }
@@ -207,14 +211,19 @@ export default function Home() {
               >
                 エクスポート
               </button>
-              <label className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors cursor-pointer">
-                インポート
+              <label className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                isImporting
+                  ? 'bg-zinc-300 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-600 cursor-wait'
+                  : 'bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 cursor-pointer'
+              }`}>
+                {isImporting ? 'インポート中...' : 'インポート'}
                 <input
                   type="file"
                   accept=".json"
                   onChange={handleImport}
                   className="sr-only"
                   aria-label="クーポンデータをインポート"
+                  disabled={isImporting}
                 />
               </label>
               <button
