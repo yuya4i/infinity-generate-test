@@ -11,6 +11,7 @@ import CouponStats from '@/components/CouponStats';
 import Pagination from '@/components/Pagination';
 import Toast from '@/components/Toast';
 import CalendarView from '@/components/CalendarView';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { useCoupons } from '@/hooks/useCoupons';
 import { useTheme } from '@/hooks/useTheme';
 import { useToast } from '@/hooks/useToast';
@@ -26,6 +27,7 @@ export default function Home() {
   const [itemsPerPage] = useState(12);
   const [isImporting, setIsImporting] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const { coupons, isLoading, addCoupon, duplicateCoupon, removeCoupon, updateCoupon, toggleFavorite, toggleUsed, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
   const { theme, toggleTheme } = useTheme();
   const { toasts, hideToast, success, error } = useToast();
@@ -244,6 +246,18 @@ export default function Home() {
                 {viewMode === 'list' ? '📅' : '📋'}
               </button>
               <button
+                onClick={() => setShowAnalytics(!showAnalytics)}
+                className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                  showAnalytics
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100'
+                }`}
+                title="統計・分析ダッシュボード"
+                aria-label="統計・分析ダッシュボード表示切り替え"
+              >
+                📊 統計
+              </button>
+              <button
                 onClick={toggleTheme}
                 className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
                 title={`現在: ${theme === 'light' ? 'ライト' : theme === 'dark' ? 'ダーク' : 'システム'}モード`}
@@ -304,31 +318,35 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <CouponStats coupons={coupons} />
-
-        <SearchBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <CategoryFilter
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-          />
-          <SortControl
-            sortBy={sortBy}
-            onSortChange={setSortBy}
-          />
-        </div>
-
-        {viewMode === 'calendar' ? (
-          <CalendarView
-            coupons={filteredAndSortedCoupons}
-            onCouponClick={setEditingCoupon}
-          />
+        {showAnalytics ? (
+          <AnalyticsDashboard coupons={coupons} />
         ) : (
           <>
+            <CouponStats coupons={coupons} />
+
+            <SearchBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
+
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <CategoryFilter
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+              />
+              <SortControl
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+              />
+            </div>
+
+            {viewMode === 'calendar' ? (
+              <CalendarView
+                coupons={filteredAndSortedCoupons}
+                onCouponClick={setEditingCoupon}
+              />
+            ) : (
+              <>
             <div
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               role="list"
@@ -357,13 +375,15 @@ export default function Home() {
               </div>
             )}
 
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredAndSortedCoupons.length}
-            />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={filteredAndSortedCoupons.length}
+                />
+              </>
+            )}
           </>
         )}
       </main>
