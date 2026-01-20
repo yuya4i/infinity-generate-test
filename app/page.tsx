@@ -9,6 +9,7 @@ import SearchBar from '@/components/SearchBar';
 import SortControl, { SortOption } from '@/components/SortControl';
 import CouponStats from '@/components/CouponStats';
 import { useCoupons } from '@/hooks/useCoupons';
+import { useTheme } from '@/hooks/useTheme';
 import { CouponCategory, Coupon } from '@/types/coupon';
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const { coupons, isLoading, addCoupon, duplicateCoupon, removeCoupon, updateCoupon, toggleFavorite, toggleUsed, clearExpiredCoupons, exportCoupons, importCoupons } = useCoupons();
+  const { theme, toggleTheme } = useTheme();
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -93,6 +95,13 @@ export default function Home() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
+              <button
+                onClick={toggleTheme}
+                className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
+                title={`現在: ${theme === 'light' ? 'ライト' : theme === 'dark' ? 'ダーク' : 'システム'}モード`}
+              >
+                {theme === 'light' ? '☀️' : theme === 'dark' ? '🌙' : '💻'}
+              </button>
               <button
                 onClick={exportCoupons}
                 className="px-4 py-2 text-sm bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded-md transition-colors"
