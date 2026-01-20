@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/useToast';
 import { CouponCategory, Coupon } from '@/types/coupon';
 
 export default function Home() {
-  const [selectedCategory, setSelectedCategory] = useState<CouponCategory | 'all' | 'favorites' | 'used'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<CouponCategory | 'all' | 'favorites' | 'used' | 'expiring-soon'>('all');
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,6 +82,12 @@ export default function Home() {
       filtered = filtered.filter(coupon => coupon.isFavorite);
     } else if (selectedCategory === 'used') {
       filtered = filtered.filter(coupon => coupon.isUsed);
+    } else if (selectedCategory === 'expiring-soon') {
+      const now = new Date();
+      filtered = filtered.filter(coupon => {
+        const daysUntilExpiry = Math.ceil((new Date(coupon.expiresAt).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        return daysUntilExpiry <= 7 && daysUntilExpiry > 0;
+      });
     } else if (selectedCategory !== 'all') {
       filtered = filtered.filter(coupon => coupon.category === selectedCategory);
     }
@@ -160,6 +166,37 @@ export default function Home() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isAddFormOpen, editingCoupon]);
+
+  // Browser notifications for expiring coupons
+  useEffect(() => {
+    // Request notification permission
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    // Check for expiring coupons and notify
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted' && coupons.length > 0) {
+      const now = new Date();
+      const expiringCoupons = coupons.filter(coupon => {
+        const daysUntilExpiry = Math.ceil((new Date(coupon.expiresAt).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        return daysUntilExpiry <= 3 && daysUntilExpiry > 0;
+      });
+
+      if (expiringCoupons.length > 0) {
+        const notification = new Notification('🚨 期限間近のクーポンがあります！', {
+          body: `${expiringCoupons.length}件のクーポンが3日以内に期限切れになります`,
+          icon: '/favicon.ico',
+          tag: 'expiring-coupons',
+          requireInteraction: false,
+        });
+
+        notification.onclick = () => {
+          window.focus();
+          setSelectedCategory('expiring-soon');
+        };
+      }
+    }
+  }, [coupons]);
 
   const paginatedCoupons = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
